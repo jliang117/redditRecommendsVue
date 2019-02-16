@@ -16,7 +16,7 @@
         <input type="range" min="1" max="100" step="1" v-model="numFrequentWords">
       </div>
       <ul class="d-flex flex-wrap justify-content-center">
-        <li class="card card--dark" :key="e.entity" v-for="e in extractedWords">
+        <li class="card card--dark" :key="e.entity" v-for="e in topWords">
           <a target="_blank" :href="wordLink(e.entity)">
             {{ e.entity }}
             <small>{{ e.count }} times</small>
@@ -30,11 +30,11 @@
         <input type="range" min="1" max="100" step="1" v-model="numSubreddits">
       </div>
       <ul class="d-flex flex-wrap justify-content-center">
-        <li class="card card--dark" :key="subreddit.name" v-for="subreddit in topSubreddits">
+        <li class="card card--dark" :key="subreddit.name" v-for="subreddit in topSubs">
           <a target="_blank" :href="subredditLink(subreddit.name)">
             /r/{{subreddit.name}}
               <div>
-              <small>{{ subreddit.count }} {{ subreddit.count == 1 ? 'post' : 'posts' }} ({{ percentageOf(subreddit.count) }}%)</small>
+              <small>{{ subreddit.count }} {{ subreddit.count == 1 ? 'comment' : 'comments' }} ({{ percentageOf(subreddit.count) }}%)</small>
             </div>
           </a>
           </li>
@@ -48,11 +48,12 @@
 
 export default {
   name: 'rec-summary',
-  props: ['searchString', 'isLoading','topSubreddits', 'extractedWords'],
+  props: ['searchString','isLoading','topSubreddits','extractedWords','allComments'],
   data() {
     return {
-      topSubreddits: {},
-      extractedWords: {},
+      topSub: [],
+      extWords: [],
+      allComments: [],
       numSubreddits: 10,
       numFrequentWords: 15,
     }
@@ -70,9 +71,33 @@ export default {
       return `https://www.google.com/search?q=${str}`
     },
     percentageOf(count){
-      return 100
+      return Math.round(
+        (100 * count) / Object.keys(this.allComments).length
+      )
     },
   },
+  computed:{
+     topWords(){
+      if (!this.extractedWords.length || isNaN(this.numFrequentWords)) return
+      this.extWords = this.extractedWords
+       let words = this.extWords.slice(0)
+      
+      if(words.length > this.numFrequentWords){
+        words.length = this.numFrequentWords
+      }
+      return words
+    },
+    topSubs(){
+      if (!this.topSubreddits.length || isNaN(this.numSubreddits)) return
+      this.topSubs = this.topSubreddits
+      let subs = this.topSubs.slice(0)
+      
+      if(subs.length > this.numSubreddits){
+        subs.length = this.numSubreddits
+      }
+      return subs
+    }
+  }
 }
 </script>
 

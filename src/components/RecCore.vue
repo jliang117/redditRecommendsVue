@@ -40,6 +40,7 @@
           :topSubreddits="topSubreddits"
           :extractedWords="extractedWords"
           :isLoading="isLoading"
+          :allComments="allComments"
         ></rec-summary>
       </div>
     </div>
@@ -57,8 +58,9 @@ export default {
   data() {
     return {
       searchData: {},
-      topSubreddits: {},
-      extractedWords: {},
+      topSubreddits: [],
+      extractedWords: [],
+      allComments: [],
       searchString: '',
       isLoading: false,
       notFound: false,
@@ -90,14 +92,18 @@ export default {
     reset() {
       this.notFound = false
       this.searchData = {},
-      this.topSubreddits = {},
+      this.topSubreddits = [],
+      this.allComments = [],
       this.extractedWords = []
+      this.finished.subreddits = false
+      this.finished.extracted = false
     },
     doSearch(payload) {
       const path = 'http://localhost:5000/search';
       axios.post(path, payload)
         .then((res) => {
-          this.searchData = res.data
+          this.searchData = JSON.parse(res.data)
+          this.findComments()
           this.findSubreddits()
           this.findExtracted()
           this.isLoading = false
@@ -121,16 +127,63 @@ export default {
       this.isLoading = true
 
       const payload = {
-        search: 'searchString'
+        search: this.searchString
       };
       this.doSearch(payload)
     },
+    findComments(){
+      this.allComments = this.searchData.body
+    },
     findSubreddits(){
-      this.topSubreddits = [{'name':'FoodNYC','count':'9'},{'name':'nyc','count':'10'},{'name':'AskNYC','count':'12'}]
+      //output format = [{'name':'FoodNYC','count':'9'},{'name':'nyc','count':'10'}]
+      
+      let subredditCounts = []
+      for(let sr in this.searchData.subreddit){
+        let eleVal = this.searchData.subreddit[sr] //json is returned like "subreddit":{ "0":"TheSilphRoad", "1":"AnotherSubreddit"}
+        let found = subredditCounts.find(ele => ele.name === eleVal) //if subreddit string already in list, just update count
+        if (found){
+          found.count++
+        }
+        else{
+          subredditCounts.push({'name':eleVal,'count':1})
+        }
+      }
+      
+      subredditCounts.sort((a, b) => b.count - a.count)
+      this.topSubreddits = subredditCounts
       this.finished.subreddits = true
     },
     findExtracted(){
-      this.extractedWords = [{'entity':'Ippudo','count': '10'}, {'entity':'Mu Ramen','count': '19'}, {'entity':'Hide-Chan','count': '5'}, {'entity':'Momofuku','count': '8'}, {'entity':'Totto Ramen','count': '25'},{'entity':'Naruto Ramen','count': '10'}, {'entity':'Last','count': '1'}]
+      //extracted format [{'entity':'Ippudo','count': '10'}, {'entity':'Mu Ramen','count': '19'}]
+      let dictOfExtracted = this.searchData.extracted
+
+      let totalExtractedStrings = new Set()
+      let toBeBuilt = []
+
+      for(let listE in dictOfExtracted){
+        if(dictOfExtracted.hasOwnProperty(listE)){
+          if(dictOfExtracted[listE].length !== 0 ){
+
+            let entitiesList = dictOfExtracted[listE]
+            for(var i = 0;i<entitiesList.length;i++){
+              let entName = entitiesList[i][0]
+                if(totalExtractedStrings.has(entName)){
+                  let found = toBeBuilt.find(ele => ele.entity === entName)
+                  if(found){
+                    found.count++
+                  }
+                }
+                else{
+                  totalExtractedStrings.add(entName)
+                  toBeBuilt.push({'entity':entName,'count':1})
+                }
+            }
+          }
+        }
+      }
+
+      this.extractedWords = toBeBuilt
+      this.extractedWords.sort((a, b) => b.count - a.count)
       this.finished.extracted = true
     },
   },
