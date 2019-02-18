@@ -37,10 +37,13 @@
       <div v-show="valid">
         <rec-summary
           :searchString="searchString"
-          :topSubreddits="topSubreddits"
-          :extractedWords="extractedWords"
           :isLoading="isLoading"
           :allComments="allComments"
+          
+          :topSubreddits="topSubreddits"
+          :extractedWords="extractedWords"
+          :topComments="highScores"
+          :permalinks="permalinks"
         ></rec-summary>
       </div>
     </div>
@@ -61,6 +64,8 @@ export default {
       topSubreddits: [],
       extractedWords: [],
       allComments: [],
+      highScores: [],
+      permalinks: [],
       searchString: '',
       isLoading: false,
       notFound: false,
@@ -91,21 +96,27 @@ export default {
   methods: {
     reset() {
       this.notFound = false
-      this.searchData = {},
-      this.topSubreddits = [],
-      this.allComments = [],
+      this.searchData = {}
+      this.topSubreddits = []
+      this.allComments = []
       this.extractedWords = []
+      this.highScores = []
+      this.permalinks = []
       this.finished.subreddits = false
       this.finished.extracted = false
     },
     doSearch(payload) {
+      console.log('requesting search')
       const path = 'http://localhost:5000/search';
       axios.post(path, payload)
         .then((res) => {
           this.searchData = JSON.parse(res.data)
           this.findComments()
+          this.findPermalinks()
+
           this.findSubreddits()
           this.findExtracted()
+          this.findTopComment()
           this.isLoading = false
         })
         .catch((error) => {
@@ -132,9 +143,15 @@ export default {
       this.doSearch(payload)
     },
     findComments(){
+      console.log('setting comments')
       this.allComments = this.searchData.body
     },
+    findPermalinks(){
+      console.log('setting permalinks')
+      this.permalinks = this.searchData.permalink
+    },
     findSubreddits(){
+      console.log('building extracted subreddits')
       //output format = [{'name':'FoodNYC','count':'9'},{'name':'nyc','count':'10'}]
       
       let subredditCounts = []
@@ -154,6 +171,7 @@ export default {
       this.finished.subreddits = true
     },
     findExtracted(){
+      console.log('building extracted entities')
       //extracted format [{'entity':'Ippudo','count': '10'}, {'entity':'Mu Ramen','count': '19'}]
       let dictOfExtracted = this.searchData.extracted
 
@@ -166,7 +184,7 @@ export default {
 
             let entitiesList = dictOfExtracted[listE]
             for(var i = 0;i<entitiesList.length;i++){
-              let entName = entitiesList[i][0]
+              let entName = entitiesList[i]
                 if(totalExtractedStrings.has(entName)){
                   let found = toBeBuilt.find(ele => ele.entity === entName)
                   if(found){
@@ -185,6 +203,17 @@ export default {
       this.extractedWords = toBeBuilt
       this.extractedWords.sort((a, b) => b.count - a.count)
       this.finished.extracted = true
+    },
+    findTopComment(){
+      //get index of highest score
+      let scores = this.searchData.score
+      for(let row in scores){
+        this.highScores.push({
+          'score': scores[row],
+          'index': row
+        })
+      }
+      this.highScores.sort((a,b) => b.score - a.score)
     },
   },
 }

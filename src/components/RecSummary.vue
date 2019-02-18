@@ -16,10 +16,10 @@
         <input type="range" min="1" max="100" step="1" v-model="numFrequentWords">
       </div>
       <ul class="d-flex flex-wrap justify-content-center">
-        <li class="card card--dark" :key="e.entity" v-for="e in topWords">
-          <a target="_blank" :href="wordLink(e.entity)">
-            {{ e.entity }}
-            <small>{{ e.count }} times</small>
+        <li class="card card--dark" :key="ent.entity" v-for="ent in topWords">
+          <a target="_blank" :href="wordLink(ent.entity)">
+            {{ ent.entity }}
+            <small>{{ ent.count }} times</small>
           </a>
         </li>
       </ul>
@@ -40,6 +40,22 @@
           </li>
       </ul>
 
+      <hr>
+      <h3>Top scoring comments</h3>
+        <div class="input-group input-group-lg input-rangeslider">
+          <input type="range" min="1" max="100" step="1" v-model="numTopComments">
+        </div>
+        <ul class="d-flex flex-wrap justify-content-center">
+          <li class="card card--dark" :key="obj.index" v-for="obj in topScoring">
+            <a target="_blank" :href="commentLink(obj.index)">
+              {{allComments[obj.index]}}
+              <div>
+                <small>{{obj.score}}</small> points
+              </div>
+            </a>
+          </li>
+        </ul>
+
     </div>
   </section>
 </template>
@@ -48,23 +64,25 @@
 
 export default {
   name: 'rec-summary',
-  props: ['searchString','isLoading','topSubreddits','extractedWords','allComments'],
+  props: ['searchString','isLoading','topSubreddits','extractedWords','allComments','topComments','permalinks'],
   data() {
     return {
-      topSub: [],
-      extWords: [],
-      allComments: [],
       numSubreddits: 10,
       numFrequentWords: 15,
+      numTopComments: 5,
     }
   },
   methods: {
+    commentLink(index) {
+      const permalink = this.permalinks[index]
+      return `https://www.reddit.com${permalink}`
+    },
     subredditLink(subreddit) {
       return `https://www.reddit.com/r/${subreddit}/`
     },
     wordLink(word) {
       const w = encodeURIComponent(word)
-      return `https://www.google.com/search?q=${w}`
+      return `https://www.google.com/search?q=${w} ${this.searchString}`
     },
     googleLink(){
       const str = encodeURIComponent(this.searchString + ' site:reddit.com');
@@ -79,8 +97,7 @@ export default {
   computed:{
      topWords(){
       if (!this.extractedWords.length || isNaN(this.numFrequentWords)) return
-      this.extWords = this.extractedWords
-       let words = this.extWords.slice(0)
+       let words = this.extractedWords.slice(0)
       
       if(words.length > this.numFrequentWords){
         words.length = this.numFrequentWords
@@ -89,15 +106,23 @@ export default {
     },
     topSubs(){
       if (!this.topSubreddits.length || isNaN(this.numSubreddits)) return
-      this.topSubs = this.topSubreddits
-      let subs = this.topSubs.slice(0)
+      let subs = this.topSubreddits.slice(0)
       
       if(subs.length > this.numSubreddits){
         subs.length = this.numSubreddits
       }
       return subs
-    }
-  }
+    },
+    topScoring(){  
+      if(!this.topComments.length || isNaN(this.numTopComments)) return
+      let comments = this.topComments.slice(0)
+
+      if(comments.length > this.numTopComments){
+        comments.length = this.numTopComments
+      }
+      return comments
+    },
+  },
 }
 </script>
 
