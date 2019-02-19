@@ -1,14 +1,15 @@
 {
-  "name": "reddit-user-analyser",
+  "name": "reddit-recommendations",
   "version": "1.0.0",
   "description": "A Vue.js project",
-  "author": "atomiks <na@gmail.com>",
+  "author": "jliang <jimmyjingyuanliang@gmail.com>",
   "private": true,
-  "homepage": "https://atomiks.github.io/reddit-user-analyser",
+  "homepage": "https://github.com/jliang117/redditRecommendsVue",
   "scripts": {
     "deploy": "npm run build && gh-pages -d dist",
     "dev": "node build/dev-server.js",
-    "build": "node build/build.js"
+    "build": "node build/build.js",
+    "start": "node server.js"
   },
   "dependencies": {
     "axios": "^0.18.0",
@@ -34,7 +35,7 @@
     "connect-history-api-fallback": "^1.3.0",
     "css-loader": "^0.26.1",
     "eventsource-polyfill": "^0.9.6",
-    "express": "^4.14.1",
+    "express": "^4.16.4",
     "extract-text-webpack-plugin": "^2.0.0-rc.2",
     "file-loader": "^0.10.0",
     "friendly-errors-webpack-plugin": "^1.1.3",
