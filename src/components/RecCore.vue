@@ -107,7 +107,7 @@ export default {
     },
     doSearch(payload) {
       console.log('requesting search')
-      const path = 'http://localhost:5000/search';
+      const path = 'https://redrec-232302.appspot.com/search';
       axios.post(path, payload)
         .then((res) => {
           this.searchData = JSON.parse(res.data)
