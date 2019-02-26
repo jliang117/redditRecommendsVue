@@ -123,7 +123,6 @@ export default {
           // eslint-disable-next-line
           this.notFound = true
           this.isLoading = false
-          alert(error)
           console.log(error);
         });
     },
@@ -172,12 +171,13 @@ export default {
     },
     findExtracted(){
       console.log('building extracted entities')
-      //extracted format [{'entity':'Ippudo','count': '10'}, {'entity':'Mu Ramen','count': '19'}]
+      //extracted output format [{'entity':'Ippudo','count': '10'}, {'entity':'Mu Ramen','count': '19'}]
       let dictOfExtracted = this.searchData.extracted
 
       let totalExtractedStrings = new Set()
       let toBeBuilt = []
 
+      //input looks like {extracted:{"1 <ROW INDEX>":["Minca Ramen", "Ippudo"],"2":[...]}}
       for(let listE in dictOfExtracted){
         if(dictOfExtracted.hasOwnProperty(listE)){
           if(dictOfExtracted[listE].length !== 0 ){
