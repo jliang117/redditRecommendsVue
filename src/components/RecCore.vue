@@ -10,7 +10,7 @@
             type="text"
             v-model="searchString"
             class="form-control username-input"
-            placeholder="Ex. ramen nyc, over-ear headphones"
+            placeholder="Ex. ramen nyc, heroku alternatives"
             aria-describedby="u-addon"
             autocapitalize="off"
             autocorrect="off"
@@ -110,7 +110,7 @@ export default {
       const path = 'https://redrec-232302.appspot.com/search';
       axios.post(path, payload)
         .then((res) => {
-          this.searchData = JSON.parse(res.data)
+          this.searchData = res.data
           this.findComments()
           this.findPermalinks()
 
@@ -180,8 +180,7 @@ export default {
       //input looks like {extracted:{"1 <ROW INDEX>":["Minca Ramen", "Ippudo"],"2":[...]}}
       for(let listE in dictOfExtracted){
         if(dictOfExtracted.hasOwnProperty(listE)){
-          if(dictOfExtracted[listE].length !== 0 ){
-
+          if(dictOfExtracted[listE].length !== 0){
             let entitiesList = dictOfExtracted[listE]
             for(var i = 0;i<entitiesList.length;i++){
               let entName = entitiesList[i]
