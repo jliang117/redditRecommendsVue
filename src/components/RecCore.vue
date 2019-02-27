@@ -140,6 +140,8 @@ export default {
         search: this.searchString
       };
       this.doSearch(payload)
+      let el = this.$el.querySelector(':focus');
+      if(el) el.blur();
     },
     findComments(){
       console.log('setting comments')
@@ -184,7 +186,8 @@ export default {
             let entitiesList = dictOfExtracted[listE]
             for(var i = 0;i<entitiesList.length;i++){
               let entName = entitiesList[i]
-                if(totalExtractedStrings.has(entName)){
+              if(entName !== "\n"){ //Consider updating this to read from a list of nonentities if more show up...
+                 if(totalExtractedStrings.has(entName)){
                   let found = toBeBuilt.find(ele => ele.entity === entName)
                   if(found){
                     found.count++
@@ -194,6 +197,8 @@ export default {
                   totalExtractedStrings.add(entName)
                   toBeBuilt.push({'entity':entName,'count':1})
                 }
+              }
+               
             }
           }
         }
