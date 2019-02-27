@@ -50,9 +50,13 @@
             <a target="_blank" :href="commentLink(obj.index)">
               {{allComments[obj.index]}}
               <div>
-                <small>{{obj.score}}</small> points
+                <small>{{obj.score}} {{obj.score == 1 ? 'point' : 'points'}}</small> 
+              </div>
+              <div>
+                <small>{{commentLink(obj.index)}} </small>
               </div>
             </a>
+             
           </li>
         </ul>
 
