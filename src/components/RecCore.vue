@@ -106,8 +106,8 @@ export default {
       this.finished.extracted = false
     },
     doSearch(payload) {
-      console.log('requesting search')
-      const path = 'https://redrec-232302.appspot.com/search';
+      const path = process.env.ROOT_API;
+      console.log('Sending search to api:' + path)
       axios.post(path, payload)
         .then((res) => {
           this.searchData = res.data
