@@ -53,7 +53,7 @@
                 <small>{{obj.score}} {{obj.score == 1 ? 'point' : 'points'}}</small> 
               </div>
               <div>
-                <small>{{commentLink(obj.index)}} </small>
+                <small>{{this.permalinks[obj.index]}} </small>
               </div>
             </a>
              
