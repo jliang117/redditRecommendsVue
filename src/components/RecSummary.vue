@@ -42,6 +42,12 @@
 
       <hr>
       <h3>Top scoring comments</h3>
+      <h4>Filter {{this.activeFilter == "" ? '':' on: ' + this.activeFilter }}</h4>
+      <div class="scrollmenu input-group">
+        <a class ="card card--dark" @click="setFilter(key)" :key=key v-for="key in threadSet">
+          {{ key }}
+        </a>
+      </div>
         <div class="input-group input-group-lg input-rangeslider">
           <input type="range" min="1" max="100" step="1" v-model="numTopComments">
         </div>
@@ -53,7 +59,7 @@
                 <small>{{obj.score}} {{obj.score == 1 ? 'point' : 'points'}}</small> 
               </div>
               <div>
-                <small>{{commentLink(obj.index)}} </small>
+                <small>{{commentLink(obj.index) | truncateBeg(22,'...')}} </small>
               </div>
             </a>
              
@@ -74,6 +80,7 @@ export default {
       numSubreddits: 10,
       numFrequentWords: 15,
       numTopComments: 5,
+      activeFilter: "",
     }
   },
   methods: {
@@ -96,6 +103,21 @@ export default {
       return Math.round(
         (100 * count) / Object.keys(this.allComments).length
       )
+    },
+    normalizePermalink(link){
+      let split = link.split('/')
+      let subreddit = split[2]
+      let title = split[5]
+      return '/r/'+subreddit + '/' + title 
+    },
+    setFilter(key){
+      if(this.activeFilter == key){
+        this.activeFilter = ""
+      }
+      else{
+        this.activeFilter = key
+      }
+      console.log("setting filter:"+ this.activeFilter)
     },
   },
   computed:{
@@ -121,10 +143,34 @@ export default {
       if(!this.topComments.length || isNaN(this.numTopComments)) return
       let comments = this.topComments.slice(0)
 
+      let links = this.permalinks
+      let normalizeFunc = this.normalizePermalink
+      let aFilter = this.activeFilter
+      if(this.activeFilter !== "" && this.activeFilter){
+        var matchNormalizedPermalinks = function(commentobj) {
+          return normalizeFunc(links[commentobj.index]) === aFilter 
+        }
+        comments = comments.filter(matchNormalizedPermalinks)
+        console.log(comments)
+      }
+
       if(comments.length > this.numTopComments){
         comments.length = this.numTopComments
       }
+
       return comments
+    },
+    threadSet(){
+      let filterList = new Set()
+      for(let thread in this.permalinks){
+        if(this.permalinks.hasOwnProperty(thread)){
+          let link = this.normalizePermalink(this.permalinks[thread])
+          // example thread link looks like: /r/node/comments/5a4939/affordable_heroku_alternative/d9dz4/
+          //we just need data in between second and third slash and fifth sixth slash
+          filterList.add(link)
+        }
+      }
+      return Array.from(filterList)
     },
   },
 }
@@ -293,6 +339,15 @@ h3 {
   margin-bottom: 1rem;
 }
 
+h4 { 
+  @extend h3;
+  font-weight: 100;
+  font-size: 1rem;
+  text-align:center;
+  margin-bottom: .75rem;
+  padding-left: 1rem;
+}
+
 .controversiality {
   font-weight: 700;
   color: #ff5600;
@@ -311,6 +366,18 @@ a {
   }
 }
 
+.scrollmenu {
+  overflow:auto;
+  white-space: nowrap;
+}
+
+.scrollmenu a{
+  display: inline-block;
+  text-align: center;
+  padding: 14px;
+  text-decoration: none;
+}
+
 .card {
   &--dark {
     cursor: pointer;
@@ -327,7 +394,7 @@ a {
       background: linear-gradient(115deg, #ff79aa, #b743ff);
       box-shadow: 0 15px 100px -4px rgba(0, 0, 0, 0.7);
       color: white;
-      transform: scale(1.1);
+      transform: scale(1.05);
     }
 
     small {
