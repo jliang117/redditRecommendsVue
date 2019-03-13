@@ -1,4 +1,4 @@
 module.exports = {
   NODE_ENV: '"production"',
-  ROOT_API: '"http://35.212.0.36:8080/search"'
+  ROOT_API: '"https://redrec-234413.appspot.com/search"'
 }
