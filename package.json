@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
-    "chart.js": "^2.5.0",
+    "chart.js": "^2.9.4",
     "cors": "^2.8.5",
     "express": "^4.16.4",
     "marked": "^0.8.0",
